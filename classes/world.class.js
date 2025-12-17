@@ -11,11 +11,14 @@ class World {
     ];
 
     backgroundObjects = [
-        new BackgroundObject('assets/img/5_background/layers/1_first_layer/1.png')
+        new BackgroundObject('assets/img/5_background/layers/air.png', 0),
+        new BackgroundObject('assets/img/5_background/layers/3_third_layer/1.png', 0),
+        new BackgroundObject('assets/img/5_background/layers/2_second_layer/1.png', 0),
+        new BackgroundObject('assets/img/5_background/layers/1_first_layer/1.png', 0)
     ];
 
-    canvas;
     ctx;
+    canvas;
 
     constructor(canvas) {
         this.ctx = canvas.getContext('2d');
@@ -26,9 +29,10 @@ class World {
     draw() {
         this.ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        addObjectsToMap(this.clouds);
-        addObjectsToMap(this.enemies);
-        addObjectsToMap(this.backgroundObjects);
+        this.addObjectsToMap(this.backgroundObjects);
+        this.addToMap(this.character);
+        this.addObjectsToMap(this.enemies);
+        this.addObjectsToMap(this.clouds);
 
         // Draw() wird immer aufgerufen!
         self = this;
@@ -46,5 +50,5 @@ class World {
     addToMap(mo) {
         this.ctx.drawImage(mo.img, mo.x, mo.y, mo.width, mo.height);
     }
-    
+
 }
