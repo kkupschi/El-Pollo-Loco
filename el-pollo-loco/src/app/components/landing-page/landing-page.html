@@ -1,10 +1,8 @@
 <div class="page-wrapper">
-
     <div class="background"></div>
 
-    @if (menuVisible()) {
+    @if (gameService.gameState() === 'menu') {
     <h1 class="game-title">El Pollo Loco</h1>
-
     <div class="canvas-wrapper">
         <div class="menu-overlay">
             <div class="menu-top-left">
@@ -12,8 +10,9 @@
                 <button class="btn-menu" (click)="openControls()">Controls</button>
             </div>
             <div class="menu-top-right">
-                <img class="mute-icon" src="/assets/icons/{{ audioService.isMuted() ? 'sound_off' : 'sound_on' }}.png"
-                    alt="Sound" (click)="audioService.toggleMute()" />
+                <img class="mute-icon" role="button"
+                    src="/assets/icons/{{ audioService.isMuted() ? 'sound_off' : 'sound_on' }}.png" alt="Sound"
+                    (click)="audioService.toggleMute()" />
             </div>
             <button class="btn-start" (click)="startGame()">Start</button>
         </div>
@@ -21,7 +20,7 @@
     </div>
     }
 
-    @if (!menuVisible()) {
+    @if (gameService.gameState() !== 'menu') {
     <app-game-canvas />
     }
 
@@ -31,13 +30,12 @@
             <button class="dialog-close" (click)="closeControls()">✕</button>
             <h2>Controls</h2>
             <ul>
-                <li><img src="assets/icons/arrow_left.png" alt="Links" /> A - Laufen links</li>
-                <li><img src="assets/icons/arrow_right.png" alt="Rechts" /> D - Laufen rechts</li>
-                <li><img src="assets/icons/arrow_up.png" alt="Springen" /> W - Springen</li>
-                <li><img src="assets/icons/bottle_button.png" alt="Flasche" /> Leertaste - Flasche werfen</li>
+                <li><img src="assets/icons/arrow_left.png" alt="Links" /> Laufen links</li>
+                <li><img src="assets/icons/arrow_right.png" alt="Rechts" /> Laufen rechts</li>
+                <li><img src="assets/icons/arrow_up.png" alt="Springen" /> Springen</li>
+                <li><img src="assets/icons/bottle_button.png" alt="Flasche" /> Flasche werfen</li>
             </ul>
         </div>
     </div>
     }
-
 </div>

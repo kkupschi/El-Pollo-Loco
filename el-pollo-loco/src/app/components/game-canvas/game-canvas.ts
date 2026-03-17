@@ -1,4 +1,5 @@
-import { Component, ElementRef, OnDestroy, OnInit, ViewChild, signal } from '@angular/core';
+import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Router } from '@angular/router';
 import { GameService } from '../../core/services/game';
 import { AudioService } from '../../core/services/audio';
 import { InputService } from '../../core/services/input';
@@ -25,8 +26,15 @@ export class GameCanvasComponent implements OnInit, OnDestroy {
 
   private ctx!: CanvasRenderingContext2D;
   private animationId = 0;
+  private animationInterval: any;
   private cameraX = 0;
-  private lastThrowTime = 0;
+  private lastFrameTime = 0;
+  private fps = 60;
+
+  private backgroundImageCache: { [key: string]: HTMLImageElement } = {};
+  private bottleImageCache: { [key: string]: HTMLImageElement } = {};
+  private collidingEnemies = new Set<Enemy | SmallEnemy>();
+  private collidingBoss = false;
 
   character = new Character();
   level!: Level;
@@ -35,24 +43,56 @@ export class GameCanvasComponent implements OnInit, OnDestroy {
   constructor(
     public gameService: GameService,
     public audioService: AudioService,
-    private inputService: InputService
+    private inputService: InputService,
+    private router: Router
   ) { }
 
   ngOnInit() {
     this.ctx = this.canvasRef.nativeElement.getContext('2d')!;
     this.initLevel();
     this.loadAllImages();
+    this.preloadBottleImages();
+    this.preloadBackgroundImages();
+    this.loadAllSounds();
+    this.gameService.startGame();
+    this.audioService.stopSound('menu_music');
+    this.audioService.playSound('music', true);
+    this.startAnimations();
+    this.startGameLoop();
+  }
+
+  ngOnDestroy() {
+    cancelAnimationFrame(this.animationId);
+    clearInterval(this.animationInterval);
+    this.audioService.stopSound('music');
+  }
+
+  private loadAllSounds() {
+    this.audioService.loadSound('music', 'assets/sounds/music/game_music.mp3', 0.3);
+    this.audioService.loadSound('characterDamage', 'assets/sounds/character/characterDamage.mp3', 0.7);
+    this.audioService.loadSound('characterDead', 'assets/sounds/character/characterDead.wav', 0.7);
+    this.audioService.loadSound('characterJump', 'assets/sounds/character/characterJump.wav', 0.7);
+    this.audioService.loadSound('characterRun', 'assets/sounds/character/characterRun.mp3', 0.3);
+    this.audioService.loadSound('characterSnoring', 'assets/sounds/character/characterSnoring.mp3', 0.3);
+    this.audioService.loadSound('chickenDead', 'assets/sounds/chicken/chickenDead.mp3', 0.7);
+    this.audioService.loadSound('bottleCollect', 'assets/sounds/collectibles/bottleCollectSound.wav', 0.7);
+    this.audioService.loadSound('coinCollect', 'assets/sounds/collectibles/collectSound.wav', 0.7);
+    this.audioService.loadSound('endbossApproach', 'assets/sounds/endboss/endbossApproach.wav', 0.7);
+    this.audioService.loadSound('bottleBreak', 'assets/sounds/throwable/bottleBreak.mp3', 0.7);
+    this.audioService.loadSound('lose', 'assets/sounds/win_lose/lose.mp3', 0.7);
+    this.audioService.loadSound('win', 'assets/sounds/win_lose/win.mp3', 0.7);
+  }
+
+  private preloadBottleImages() {
     const tempBottle = new Bottle(0, 0);
-    tempBottle.images_rotation.forEach(path => {
+    [...tempBottle.images_rotation, ...tempBottle.images_splash].forEach(path => {
       const img = new Image();
       img.src = path;
       this.bottleImageCache[path] = img;
     });
-    tempBottle.images_splash.forEach(path => {
-      const img = new Image();
-      img.src = path;
-      this.bottleImageCache[path] = img;
-    });
+  }
+
+  private preloadBackgroundImages() {
     this.level.backgroundLayers.forEach(layer => {
       layer.forEach(imgPath => {
         const img = new Image();
@@ -60,33 +100,6 @@ export class GameCanvasComponent implements OnInit, OnDestroy {
         this.backgroundImageCache[imgPath] = img;
       });
     });
-    this.gameService.startGame();
-    this.startAnimations();
-    this.audioService.loadSound('music', 'assets/sounds/music/game_music.mp3', 0.1);
-    this.audioService.playSound('music', true);
-    this.audioService.stopSound('menu_music');
-    this.startGameLoop();
-    this.audioService.loadSound('music', 'assets/sounds/music/game_music.mp3', 0.1);
-    this.audioService.loadSound('characterDamage', 'assets/sounds/character/characterDamage.mp3', 0.1);
-    this.audioService.loadSound('characterDead', 'assets/sounds/character/characterDead.wav', 0.1);
-    this.audioService.loadSound('characterJump', 'assets/sounds/character/characterJump.wav', 0.1);
-    this.audioService.loadSound('characterRun', 'assets/sounds/character/characterRun.mp3', 0.1);
-    this.audioService.loadSound('characterSnoring', 'assets/sounds/character/characterSnoring.mp3', 0.1);
-    this.audioService.loadSound('chickenDead', 'assets/sounds/chicken/chickenDead.mp3', 0.1);
-    this.audioService.loadSound('chickenDead2', 'assets/sounds/chicken/chickenDead2.mp3', 0.1);
-    this.audioService.loadSound('bottleCollect', 'assets/sounds/collectibles/bottleCollectSound.wav', 0.1);
-    this.audioService.loadSound('coinCollect', 'assets/sounds/collectibles/collectSound.wav', 0.1);
-    this.audioService.loadSound('endbossApproach', 'assets/sounds/endboss/endbossApproach.wav', 0.1);
-    this.audioService.loadSound('gameStart', 'assets/sounds/game/gameStart.mp3', 0.1);
-    this.audioService.loadSound('bottleBreak', 'assets/sounds/throwable/bottleBreak.mp3', 0.1);
-    this.audioService.loadSound('lose', 'assets/sounds/win_lose/lose.mp3', 0.1);
-    this.audioService.loadSound('win', 'assets/sounds/win_lose/win.mp3', 0.1);
-  }
-
-  ngOnDestroy() {
-    cancelAnimationFrame(this.animationId);
-    clearInterval(this.animationInterval);
-    this.audioService.stopSound('music');
   }
 
   private initLevel() {
@@ -129,12 +142,10 @@ export class GameCanvasComponent implements OnInit, OnDestroy {
     this.character.loadImages(this.character.images_dead);
     this.character.loadImages(this.character.images_idle);
     this.character.loadImages(this.character.images_sleep);
-
     this.level.enemies.forEach(e => {
       e.loadImages(e.images_walking);
       e.loadImages(e.images_dead);
     });
-
     this.level.endboss.forEach(b => {
       b.loadImages(b.images_walking);
       b.loadImages(b.images_alert);
@@ -142,28 +153,37 @@ export class GameCanvasComponent implements OnInit, OnDestroy {
       b.loadImages(b.images_hurt);
       b.loadImages(b.images_dead);
     });
-
     this.level.coins.forEach(c => c.loadImages(c.images_coin));
     this.level.bottles.forEach(b => b.loadImages(b.images_ground));
   }
-
-  private lastFrameTime = 0;
-  private fps = 60;
 
   private startGameLoop() {
     const loop = (timestamp: number) => {
       const interval = 1000 / this.fps;
       const delta = timestamp - this.lastFrameTime;
-
       if (delta >= interval) {
         this.lastFrameTime = timestamp - (delta % interval);
         this.update();
         this.draw();
       }
-
       this.animationId = requestAnimationFrame(loop);
     };
     this.animationId = requestAnimationFrame(loop);
+  }
+
+  private startAnimations() {
+    this.animationInterval = setInterval(() => {
+      this.character.imgIndex++;
+      this.level.enemies.forEach(e => e.imgIndex++);
+      this.level.endboss.forEach(b => b.imgIndex++);
+      if (this.character.isSleeping) {
+        if (!this.audioService.isPlaying('characterSnoring')) {
+          this.audioService.playSound('characterSnoring', true);
+        }
+      } else {
+        this.audioService.stopSound('characterSnoring');
+      }
+    }, 100);
   }
 
   private update() {
@@ -176,19 +196,7 @@ export class GameCanvasComponent implements OnInit, OnDestroy {
   }
 
   private updateCharacter() {
-    if (this.inputService.moveRight() || this.inputService.moveLeft()) {
-      if (!this.audioService.isPlaying('characterRun')) {
-        this.audioService.playSound('characterRun', true);
-      }
-    } else {
-      this.audioService.stopSound('characterRun');
-    }
-
-    if (this.inputService.jump() && this.character.isGrounded) {
-      if (!this.audioService.isPlaying('characterJump')) {
-        this.audioService.playSound('characterJump');
-      }
-    } if (this.inputService.moveRight()) {
+    if (this.inputService.moveRight()) {
       this.character.moveRight();
       this.character.updateLastMoveTime();
     }
@@ -196,9 +204,17 @@ export class GameCanvasComponent implements OnInit, OnDestroy {
       this.character.moveLeft();
       this.character.updateLastMoveTime();
     }
+    if (this.inputService.moveRight() || this.inputService.moveLeft()) {
+      if (!this.audioService.isPlaying('characterRun')) {
+        this.audioService.playSound('characterRun', true);
+      }
+    } else {
+      this.audioService.stopSound('characterRun');
+    }
     if (this.inputService.jump() && this.character.isGrounded) {
       this.character.jump();
       this.character.updateLastMoveTime();
+      this.audioService.playSound('characterJump');
     }
     if (this.inputService.throwBottle()) {
       this.throwBottle();
@@ -209,18 +225,13 @@ export class GameCanvasComponent implements OnInit, OnDestroy {
   }
 
   private throwBottle() {
-    const now = Date.now();
-    if (now - this.lastThrowTime < 500) return;
     if (this.gameService.bottles() <= 0) return;
-    this.lastThrowTime = now;
     const bottle = new Bottle(this.character.x + 50, this.character.y + 100);
     bottle.imageCache = this.bottleImageCache;
     bottle.throw();
     this.thrownBottles.push(bottle);
     this.gameService.bottles.set(this.gameService.bottles() - 1);
   }
-
-  private bottleImageCache: { [key: string]: HTMLImageElement } = {};
 
   private updateEnemies() {
     this.level.enemies.forEach(enemy => {
@@ -252,29 +263,7 @@ export class GameCanvasComponent implements OnInit, OnDestroy {
     this.checkEndbossProximity();
   }
 
-  private collidingEnemies = new Set<Enemy | SmallEnemy>();
-  private collidingBoss = false;
-
-  private animationInterval: any;
-
-  private startAnimations() {
-    if (this.character.isSleeping) {
-      if (!this.audioService.isPlaying('characterSnoring')) {
-        this.audioService.playSound('characterSnoring', true);
-      }
-    } else {
-      this.audioService.stopSound('characterSnoring');
-    } this.animationInterval = setInterval(() => {
-      this.character.imgIndex++;
-      this.level.enemies.forEach(e => e.imgIndex++);
-      this.level.endboss.forEach(b => b.imgIndex++);
-      this.thrownBottles.forEach(b => b.imgIndex++);
-    }, 100);
-  }
-
   private checkCharacterEnemyCollisions() {
-    this.audioService.playSound('chickenDead');
-    this.audioService.playSound('characterDamage');
     this.level.enemies.forEach(enemy => {
       if (enemy.isDead()) return;
       if (this.character.isColliding(enemy)) {
@@ -282,10 +271,16 @@ export class GameCanvasComponent implements OnInit, OnDestroy {
           this.collidingEnemies.add(enemy);
           if (this.character.isAbove(enemy)) {
             enemy.hit(1);
+            this.audioService.playSound('chickenDead');
           } else {
             this.character.hit(20);
+            this.audioService.playSound('characterDamage');
             this.gameService.characterHealth.set(this.character.energy);
-            if (this.character.isDead()) this.gameService.loseGame();
+            if (this.character.isDead()) {
+              this.audioService.stopSound('music');
+              this.audioService.playSound('lose');
+              this.gameService.loseGame();
+            }
           }
         }
       } else {
@@ -295,15 +290,19 @@ export class GameCanvasComponent implements OnInit, OnDestroy {
   }
 
   private checkCharacterEndbossCollision() {
-    this.audioService.playSound('characterDamage');
     this.level.endboss.forEach(boss => {
       if (boss.isDead()) return;
       if (this.character.isColliding(boss)) {
         if (!this.collidingBoss) {
           this.collidingBoss = true;
-          this.character.hit(60);
+          this.character.hit(40);
+          this.audioService.playSound('characterDamage');
           this.gameService.characterHealth.set(this.character.energy);
-          if (this.character.isDead()) this.gameService.loseGame();
+          if (this.character.isDead()) {
+            this.audioService.stopSound('music');
+            this.audioService.playSound('lose');
+            this.gameService.loseGame();
+          }
         }
       } else {
         this.collidingBoss = false;
@@ -312,7 +311,6 @@ export class GameCanvasComponent implements OnInit, OnDestroy {
   }
 
   private checkCharacterCoinCollisions() {
-    this.audioService.playSound('coinCollect');
     this.level.coins = this.level.coins.filter(coin => {
       if (this.character.isColliding(coin)) {
         this.audioService.playSound('coinCollect');
@@ -326,6 +324,7 @@ export class GameCanvasComponent implements OnInit, OnDestroy {
   private checkCharacterBottleCollisions() {
     this.level.bottles = this.level.bottles.filter(bottle => {
       if (this.character.isColliding(bottle)) {
+        this.audioService.playSound('bottleCollect');
         this.gameService.bottles.set(this.gameService.bottles() + 1);
         return false;
       }
@@ -333,30 +332,33 @@ export class GameCanvasComponent implements OnInit, OnDestroy {
     });
   }
 
-
   private checkBottleEnemyCollisions() {
-    this.audioService.playSound('bottleBreak');
     this.thrownBottles.forEach(bottle => {
       this.level.enemies.forEach(enemy => {
         if (!enemy.isDead() && bottle.isColliding(enemy)) {
           enemy.hit(1);
+          this.audioService.playSound('chickenDead');
         }
       });
       this.level.endboss.forEach(boss => {
         if (!boss.isDead() && bottle.isColliding(boss)) {
           boss.hit(20);
           this.gameService.endbossHealth.set(boss.energy);
-          if (boss.isDead()) this.gameService.winGame();
+          if (boss.isDead()) {
+            this.audioService.stopSound('music');
+            this.audioService.playSound('win');
+            this.gameService.winGame();
+          }
         }
       });
     });
   }
 
   private checkEndbossProximity() {
-    this.audioService.playSound('endbossApproach');
     this.level.endboss.forEach(boss => {
       if (Math.abs(this.character.x - boss.x) < 300 && !boss.isAlerted) {
         boss.alert();
+        this.audioService.playSound('endbossApproach');
       }
     });
   }
@@ -369,9 +371,7 @@ export class GameCanvasComponent implements OnInit, OnDestroy {
   private draw() {
     const canvas = this.canvasRef.nativeElement;
     this.ctx.clearRect(0, 0, canvas.width, canvas.height);
-
     this.drawBackground();
-
     this.ctx.save();
     this.ctx.translate(this.cameraX, 0);
     this.drawCoins();
@@ -387,7 +387,6 @@ export class GameCanvasComponent implements OnInit, OnDestroy {
     const canvas = this.canvasRef.nativeElement;
     const canvasWidth = canvas.width;
     const startX = Math.floor(-this.cameraX / canvasWidth) * canvasWidth;
-
     this.level.backgroundLayers.forEach(layer => {
       layer.forEach(imgPath => {
         const img = this.backgroundImageCache[imgPath];
@@ -398,7 +397,6 @@ export class GameCanvasComponent implements OnInit, OnDestroy {
       });
     });
   }
-  private backgroundImageCache: { [key: string]: HTMLImageElement } = {};
 
   private drawCoins() {
     this.level.coins.forEach(coin => {
@@ -447,7 +445,6 @@ export class GameCanvasComponent implements OnInit, OnDestroy {
   private drawCharacter() {
     const char = this.character;
     let imgPath = char.images_idle[char.imgIndex % char.images_idle.length];
-
     if (char.isDead()) {
       imgPath = char.images_dead[char.imgIndex % char.images_dead.length];
     } else if (!char.isGrounded) {
@@ -457,7 +454,6 @@ export class GameCanvasComponent implements OnInit, OnDestroy {
     } else if (char.isSleeping) {
       imgPath = char.images_sleep[char.imgIndex % char.images_sleep.length];
     }
-
     const img = char.imageCache[imgPath];
     if (img) this.ctx.drawImage(img, char.x, char.y, char.width, char.height);
   }
@@ -470,10 +466,14 @@ export class GameCanvasComponent implements OnInit, OnDestroy {
     this.cameraX = 0;
     this.initLevel();
     this.loadAllImages();
+    this.audioService.loadSound('music', 'assets/sounds/music/game_music.mp3', 0.3);
+    this.audioService.playSound('music', true);
     this.gameService.restartGame();
   }
 
   goHome() {
+    this.audioService.stopSound('music');
     this.gameService.gameState.set('menu');
+    this.router.navigate(['/']);
   }
 }
