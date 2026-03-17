@@ -1,0 +1,53 @@
+.impressum-wrapper {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-image: url('/assets/img/5_background/pageBackground.jpg');
+    background-size: cover;
+    background-position: center;
+}
+
+.impressum-box {
+    background: rgba(0, 0, 0, 0.75);
+    color: white;
+    padding: 2rem 3rem;
+    border-radius: 12px;
+    max-width: 600px;
+    width: 90%;
+    font-family: 'Arial', sans-serif;
+}
+
+h1 {
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+    color: #e87c1e;
+}
+
+h2 {
+    font-size: 1.2rem;
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+    color: #e87c1e;
+}
+
+p {
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+.btn-back {
+    margin-top: 2rem;
+    background-color: #e87c1e;
+    color: white;
+    border: none;
+    padding: 10px 30px;
+    font-size: 1rem;
+    cursor: pointer;
+    border-radius: 6px;
+}
+
+.btn-back:hover {
+    background-color: #c96510;
+}

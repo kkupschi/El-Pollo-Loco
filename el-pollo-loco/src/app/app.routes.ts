@@ -8,22 +8,22 @@ export const routes: Routes = [
                 (m) => m.LandingPageComponent
             ),
     },
-    // {
-    //     path: 'game',
-    //     loadComponent: () =>
-    //         import('./components/game-canvas/game-canvas').then(
-    //             (m) => m.GameCanvasComponent
-    //         ),
-    // },
-    // {
-    //     path: 'impressum',
-    //     loadComponent: () =>
-    //         import('./components/impressum/impressum').then(
-    //             (m) => m.ImpressumComponent
-    //         ),
-    // },
-    // {
-    //     path: '**',
-    //     redirectTo: '',
-    // },
+    {
+        path: 'game',
+        loadComponent: () =>
+            import('./components/game-canvas/game-canvas').then(
+                (m) => m.GameCanvasComponent
+            ),
+    },
+    {
+        path: 'impressum',
+        loadComponent: () =>
+            import('./components/impressum/impressum').then(
+                (m) => m.ImpressumComponent
+            ),
+    },
+    {
+        path: '**',
+        redirectTo: '',
+    },
 ];
