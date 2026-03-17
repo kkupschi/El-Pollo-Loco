@@ -118,9 +118,6 @@ export class Character extends MovableObject {
     lastHitTime = 0;
 
     override hit(damage: number) {
-        const now = Date.now();
-        if (now - this.lastHitTime < 1500) return;
-        this.lastHitTime = now;
         this.energy -= damage;
         if (this.energy < 0) this.energy = 0;
     }

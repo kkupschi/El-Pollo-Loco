@@ -222,19 +222,25 @@ export class GameCanvasComponent implements OnInit, OnDestroy {
     this.checkEndbossProximity();
   }
 
+  private collidingEnemies = new Set<Enemy | SmallEnemy>();
+  private collidingBoss = false;
+
   private checkCharacterEnemyCollisions() {
     this.level.enemies.forEach(enemy => {
       if (enemy.isDead()) return;
       if (this.character.isColliding(enemy)) {
-        if (this.character.isAbove(enemy)) {
-          enemy.hit(1);
-          this.audioService.loadSound('chicken_dead', 'assets/sounds/chicken/chicken_dead.mp3');
-          this.audioService.playSound('chicken_dead');
-        } else {
-          this.character.hit(10);
-          this.gameService.characterHealth.set(this.character.energy);
-          if (this.character.isDead()) this.gameService.loseGame();
+        if (!this.collidingEnemies.has(enemy)) {
+          this.collidingEnemies.add(enemy);
+          if (this.character.isAbove(enemy)) {
+            enemy.hit(1);
+          } else {
+            this.character.hit(20);
+            this.gameService.characterHealth.set(this.character.energy);
+            if (this.character.isDead()) this.gameService.loseGame();
+          }
         }
+      } else {
+        this.collidingEnemies.delete(enemy);
       }
     });
   }
@@ -243,9 +249,14 @@ export class GameCanvasComponent implements OnInit, OnDestroy {
     this.level.endboss.forEach(boss => {
       if (boss.isDead()) return;
       if (this.character.isColliding(boss)) {
-        this.character.hit(20);
-        this.gameService.characterHealth.set(this.character.energy);
-        if (this.character.isDead()) this.gameService.loseGame();
+        if (!this.collidingBoss) {
+          this.collidingBoss = true;
+          this.character.hit(60);
+          this.gameService.characterHealth.set(this.character.energy);
+          if (this.character.isDead()) this.gameService.loseGame();
+        }
+      } else {
+        this.collidingBoss = false;
       }
     });
   }
