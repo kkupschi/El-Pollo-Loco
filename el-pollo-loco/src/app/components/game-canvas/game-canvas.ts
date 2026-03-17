@@ -277,7 +277,7 @@ export class GameCanvasComponent implements OnInit, OnDestroy {
             this.audioService.playSound('characterDamage');
             this.gameService.characterHealth.set(this.character.energy);
             if (this.character.isDead()) {
-              this.audioService.stopSound('music');
+              this.audioService.stopAllSounds();
               this.audioService.playSound('lose');
               this.gameService.loseGame();
             }
@@ -299,7 +299,7 @@ export class GameCanvasComponent implements OnInit, OnDestroy {
           this.audioService.playSound('characterDamage');
           this.gameService.characterHealth.set(this.character.energy);
           if (this.character.isDead()) {
-            this.audioService.stopSound('music');
+            this.audioService.stopAllSounds();
             this.audioService.playSound('lose');
             this.gameService.loseGame();
           }
@@ -342,10 +342,10 @@ export class GameCanvasComponent implements OnInit, OnDestroy {
       });
       this.level.endboss.forEach(boss => {
         if (!boss.isDead() && bottle.isColliding(boss)) {
-          boss.hit(20);
+          boss.hit(5);
           this.gameService.endbossHealth.set(boss.energy);
           if (boss.isDead()) {
-            this.audioService.stopSound('music');
+            this.audioService.stopAllSounds();
             this.audioService.playSound('win');
             this.gameService.winGame();
           }
@@ -358,6 +358,7 @@ export class GameCanvasComponent implements OnInit, OnDestroy {
     this.level.endboss.forEach(boss => {
       if (Math.abs(this.character.x - boss.x) < 300 && !boss.isAlerted) {
         boss.alert();
+        this.gameService.endbossVisible.set(true);
         this.audioService.playSound('endbossApproach');
       }
     });
@@ -459,6 +460,7 @@ export class GameCanvasComponent implements OnInit, OnDestroy {
   }
 
   restartGame() {
+    this.audioService.stopAllSounds();
     this.character = new Character();
     this.thrownBottles = [];
     this.collidingEnemies = new Set();
@@ -466,13 +468,13 @@ export class GameCanvasComponent implements OnInit, OnDestroy {
     this.cameraX = 0;
     this.initLevel();
     this.loadAllImages();
-    this.audioService.loadSound('music', 'assets/sounds/music/game_music.mp3', 0.3);
+    this.loadAllSounds();
     this.audioService.playSound('music', true);
     this.gameService.restartGame();
   }
 
   goHome() {
-    this.audioService.stopSound('music');
+    this.audioService.stopAllSounds();
     this.gameService.gameState.set('menu');
     this.router.navigate(['/']);
   }

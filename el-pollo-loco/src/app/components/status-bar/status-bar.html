@@ -12,3 +12,10 @@
             alt="Bottles" />
     </div>
 </div>
+
+<div class="status-bar-endboss">
+    @if (gameService.endbossVisible()) {
+    <img [src]="'assets/img/7_statusbars/1_statusbar/2_statusbar_health/orange/' + getEndbossImage() + '.png'"
+        alt="Endboss Health" />
+    }
+</div>

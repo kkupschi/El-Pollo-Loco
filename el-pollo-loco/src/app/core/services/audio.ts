@@ -50,4 +50,11 @@ export class AudioService {
     if (!audio) return false;
     return !audio.paused;
   }
+
+  stopAllSounds() {
+    Object.values(this.sounds).forEach(audio => {
+      audio.pause();
+      audio.currentTime = 0;
+    });
+  }
 }

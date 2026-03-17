@@ -14,6 +14,7 @@ export class GameService {
   bottles = signal(0);
   characterHealth = signal(100);
   endbossHealth = signal(100);
+  endbossVisible = signal(false);
 
   startGame() {
     this.gameState.set('running');

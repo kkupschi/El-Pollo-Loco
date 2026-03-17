@@ -33,4 +33,8 @@ export class StatusBarComponent {
     if (value >= 20) return '20';
     return '0';
   }
+
+  getEndbossImage(): string {
+    return this.getStatusImage(this.gameService.endbossHealth());
+  }
 }

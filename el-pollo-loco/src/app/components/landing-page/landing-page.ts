@@ -22,7 +22,8 @@ export class LandingPageComponent implements OnInit {
 
   ngOnInit() {
     this.gameService.gameState.set('menu');
-    this.audioService.loadSound('menu_music', 'assets/sounds/music/menu_music.mp3', 0.3);
+    this.audioService.stopAllSounds();
+    this.audioService.loadSound('menu_music', 'assets/sounds/music/menu_music.mp3', 0.1);
     this.audioService.playSound('menu_music', true);
   }
 
