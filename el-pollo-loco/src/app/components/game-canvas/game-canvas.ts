@@ -332,17 +332,21 @@ export class GameCanvasComponent implements OnInit, OnDestroy {
     });
   }
 
+  private hitBottles = new Set<Bottle>();
+
   private checkBottleEnemyCollisions() {
     this.thrownBottles.forEach(bottle => {
       this.level.enemies.forEach(enemy => {
-        if (!enemy.isDead() && bottle.isColliding(enemy)) {
+        if (!enemy.isDead() && !this.hitBottles.has(bottle) && bottle.isColliding(enemy)) {
+          this.hitBottles.add(bottle);
           enemy.hit(1);
           this.audioService.playSound('chickenDead');
         }
       });
       this.level.endboss.forEach(boss => {
-        if (!boss.isDead() && bottle.isColliding(boss)) {
-          boss.hit(5);
+        if (!boss.isDead() && !this.hitBottles.has(bottle) && bottle.isColliding(boss)) {
+          this.hitBottles.add(bottle);
+          boss.hit(40);
           this.gameService.endbossHealth.set(boss.energy);
           if (boss.isDead()) {
             this.audioService.stopAllSounds();
@@ -470,6 +474,7 @@ export class GameCanvasComponent implements OnInit, OnDestroy {
     this.loadAllImages();
     this.loadAllSounds();
     this.audioService.playSound('music', true);
+    this.hitBottles = new Set();
     this.gameService.restartGame();
   }
 
