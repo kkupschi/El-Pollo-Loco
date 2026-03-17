@@ -419,4 +419,19 @@ export class GameCanvasComponent implements OnInit, OnDestroy {
     const img = char.imageCache[imgPath];
     if (img) this.ctx.drawImage(img, char.x, char.y, char.width, char.height);
   }
+
+  restartGame() {
+    this.character = new Character();
+    this.thrownBottles = [];
+    this.collidingEnemies = new Set();
+    this.collidingBoss = false;
+    this.cameraX = 0;
+    this.initLevel();
+    this.loadAllImages();
+    this.gameService.restartGame();
+  }
+
+  goHome() {
+    this.gameService.gameState.set('menu');
+  }
 }

@@ -3,6 +3,6 @@
     <canvas #canvas width="720" height="480" class="game-canvas"></canvas>
     <app-mobile-controls />
     @if (gameService.gameState() === 'won' || gameService.gameState() === 'lost') {
-    <app-end-screen />
+    <app-end-screen (onRestart)="restartGame()" (onHome)="goHome()" />
     }
 </div>

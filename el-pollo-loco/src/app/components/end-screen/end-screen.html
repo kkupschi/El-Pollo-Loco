@@ -1,1 +1,12 @@
-<p>end-screen works!</p>
+<div class="end-screen">
+    @if (gameService.gameState() === 'won') {
+    <img src="assets/img/You_won_you_lost/You_Win_A.png" alt="You Win" />
+    }
+    @if (gameService.gameState() === 'lost') {
+    <img src="assets/img/You_won_you_lost/You_lost.png" alt="You Lost" />
+    }
+    <div class="end-buttons">
+        <button class="btn-restart" (click)="restart()">Restart</button>
+        <button class="btn-home" (click)="goHome()">Home</button>
+    </div>
+</div>
