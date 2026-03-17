@@ -1,1 +1,8 @@
-<p>game-canvas works!</p>
+<div class="game-wrapper">
+    <app-status-bar />
+    <canvas #canvas width="720" height="480" class="game-canvas"></canvas>
+    <app-mobile-controls />
+    @if (gameService.gameState() === 'won' || gameService.gameState() === 'lost') {
+    <app-end-screen />
+    }
+</div>

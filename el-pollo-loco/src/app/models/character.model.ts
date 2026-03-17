@@ -3,10 +3,10 @@ import { MovableObject } from './movable-object.model';
 export class Character extends MovableObject {
 
     override x = 50;
-    override y = 280;
+    override y = 180;
     override width = 120;
     override height = 250;
-    override speed = 5;
+    override speed = 2;
     override energy = 100;
 
     override offsetTop = 120;
@@ -19,8 +19,8 @@ export class Character extends MovableObject {
     lastMoveTime = Date.now();
     isSleeping = false;
 
-    readonly jumpForce = -25;
-    readonly gravity = 2.5;
+    readonly jumpForce = -15;
+    readonly gravity = 0.5;
 
     images_walking = [
         'assets/img/2_character_pepe/2_walk/W-21.png',
@@ -96,8 +96,8 @@ export class Character extends MovableObject {
             this.speedY += this.gravity;
             this.y += this.speedY;
         }
-        if (this.y >= 280) {
-            this.y = 280;
+        if (this.y >= 180) {
+            this.y = 180;
             this.isGrounded = true;
             this.speedY = 0;
         }

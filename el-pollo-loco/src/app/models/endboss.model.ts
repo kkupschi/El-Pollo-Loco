@@ -7,10 +7,10 @@ export class Endboss extends MovableObject {
     override speed = 0.8;
     override energy = 100;
 
-    override offsetTop = 50;
-    override offsetBottom = 10;
-    override offsetLeft = 30;
-    override offsetRight = 20;
+    override offsetTop = 80;
+    override offsetBottom = 20;
+    override offsetLeft = 40;
+    override offsetRight = 40;
 
     isAlerted = false;
     isAttacking = false;
@@ -59,7 +59,7 @@ export class Endboss extends MovableObject {
     constructor() {
         super();
         this.x = 2500;
-        this.y = 150;
+        this.y = 180;
     }
 
     alert() {

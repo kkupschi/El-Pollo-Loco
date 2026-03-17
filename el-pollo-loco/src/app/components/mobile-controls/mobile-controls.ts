@@ -2,8 +2,7 @@ import { Component } from '@angular/core';
 
 @Component({
   selector: 'app-mobile-controls',
-  imports: [],
-  templateUrl: './mobile-controls.html',
-  styleUrl: './mobile-controls.css',
+  standalone: true,
+  template: ``
 })
-export class MobileControls {}
+export class MobileControlsComponent { }

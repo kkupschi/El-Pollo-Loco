@@ -2,8 +2,7 @@ import { Component } from '@angular/core';
 
 @Component({
   selector: 'app-status-bar',
-  imports: [],
-  templateUrl: './status-bar.html',
-  styleUrl: './status-bar.css',
+  standalone: true,
+  template: ``
 })
-export class StatusBar {}
+export class StatusBarComponent { }

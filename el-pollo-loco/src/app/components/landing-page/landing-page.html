@@ -1,25 +1,30 @@
 <div class="page-wrapper">
+
     <div class="background"></div>
+
+    @if (menuVisible()) {
     <h1 class="game-title">El Pollo Loco</h1>
+
     <div class="canvas-wrapper">
-        @if (menuVisible()) {
         <div class="menu-overlay">
             <div class="menu-top-left">
                 <button class="btn-menu" routerLink="/impressum">Legal Notice</button>
                 <button class="btn-menu" (click)="openControls()">Controls</button>
             </div>
-
             <div class="menu-top-right">
                 <img class="mute-icon" src="/assets/icons/{{ audioService.isMuted() ? 'sound_off' : 'sound_on' }}.png"
                     alt="Sound" (click)="audioService.toggleMute()" />
             </div>
-
             <button class="btn-start" (click)="startGame()">Start</button>
-
         </div>
-        }
         <img class="intro-image" src="assets/img/9_intro_outro_screens/startscreen_1.png" alt="El Pollo Loco" />
     </div>
+    }
+
+    @if (!menuVisible()) {
+    <app-game-canvas />
+    }
+
     @if (controlsOpen()) {
     <div class="dialog-backdrop" (click)="closeControls()">
         <div class="dialog" (click)="$event.stopPropagation()">
@@ -34,4 +39,5 @@
         </div>
     </div>
     }
+
 </div>
