@@ -1,1 +1,14 @@
-<p>status-bar works!</p>
+<div class="status-bar-wrapper">
+    <div class="status-item">
+        <img [src]="'assets/img/7_statusbars/1_statusbar/2_statusbar_health/orange/' + getHealthImage() + '.png'"
+            alt="Health" />
+    </div>
+    <div class="status-item">
+        <img [src]="'assets/img/7_statusbars/1_statusbar/1_statusbar_coin/orange/' + getCoinImage() + '.png'"
+            alt="Coins" />
+    </div>
+    <div class="status-item">
+        <img [src]="'assets/img/7_statusbars/1_statusbar/3_statusbar_bottle/orange/' + getBottleImage() + '.png'"
+            alt="Bottles" />
+    </div>
+</div>

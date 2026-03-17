@@ -1,0 +1,14 @@
+.status-bar-wrapper {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.status-item img {
+    width: 150px;
+    height: auto;
+}
