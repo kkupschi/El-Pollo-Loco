@@ -26,6 +26,7 @@ export class GameCanvasComponent implements OnInit, OnDestroy {
   private ctx!: CanvasRenderingContext2D;
   private animationId = 0;
   private cameraX = 0;
+  private lastThrowTime = 0;
 
   character = new Character();
   level!: Level;
@@ -41,6 +42,17 @@ export class GameCanvasComponent implements OnInit, OnDestroy {
     this.ctx = this.canvasRef.nativeElement.getContext('2d')!;
     this.initLevel();
     this.loadAllImages();
+    const tempBottle = new Bottle(0, 0);
+    tempBottle.images_rotation.forEach(path => {
+      const img = new Image();
+      img.src = path;
+      this.bottleImageCache[path] = img;
+    });
+    tempBottle.images_splash.forEach(path => {
+      const img = new Image();
+      img.src = path;
+      this.bottleImageCache[path] = img;
+    });
     this.level.backgroundLayers.forEach(layer => {
       layer.forEach(imgPath => {
         const img = new Image();
@@ -160,20 +172,25 @@ export class GameCanvasComponent implements OnInit, OnDestroy {
     }
     if (this.inputService.throwBottle()) {
       this.throwBottle();
+      this.inputService.setThrowBottle(false);
     }
     this.character.applyGravity();
     this.character.checkSleep();
   }
 
   private throwBottle() {
+    const now = Date.now();
+    if (now - this.lastThrowTime < 500) return;
     if (this.gameService.bottles() <= 0) return;
+    this.lastThrowTime = now;
     const bottle = new Bottle(this.character.x + 50, this.character.y + 100);
-    bottle.loadImages(bottle.images_rotation);
-    bottle.loadImages(bottle.images_splash);
+    bottle.imageCache = this.bottleImageCache;
     bottle.throw();
     this.thrownBottles.push(bottle);
     this.gameService.bottles.set(this.gameService.bottles() - 1);
   }
+
+  private bottleImageCache: { [key: string]: HTMLImageElement } = {};
 
   private updateEnemies() {
     this.level.enemies.forEach(enemy => {
@@ -188,11 +205,12 @@ export class GameCanvasComponent implements OnInit, OnDestroy {
     this.thrownBottles.forEach(bottle => {
       if (bottle.isThrown) {
         bottle.x += bottle.speed;
-        bottle.speedY += 1;
+        bottle.speedY += 0.5;
         bottle.y += bottle.speedY;
+        bottle.imgIndex = (bottle.imgIndex + 1) % bottle.images_rotation.length;
       }
     });
-    this.thrownBottles = this.thrownBottles.filter(b => b.x < 720 + this.cameraX);
+    this.thrownBottles = this.thrownBottles.filter(b => b.y < 480 && b.x < 3000);
   }
 
   private checkCollisions() {
@@ -354,8 +372,8 @@ export class GameCanvasComponent implements OnInit, OnDestroy {
 
   private drawThrownBottles() {
     this.thrownBottles.forEach(bottle => {
-      const imgPath = bottle.images_rotation[bottle.imgIndex % bottle.images_rotation.length];
-      const img = bottle.imageCache[imgPath];
+      const imgPath = bottle.images_rotation[bottle.imgIndex];
+      const img = this.bottleImageCache[imgPath];
       if (img) this.ctx.drawImage(img, bottle.x, bottle.y, bottle.width, bottle.height);
     });
   }

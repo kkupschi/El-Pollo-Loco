@@ -5,10 +5,11 @@ import { Injectable, signal } from '@angular/core';
 })
 export class InputService {
 
+  private throwPressed = false;
+  throwBottle = signal(false);
   moveLeft = signal(false);
   moveRight = signal(false);
   jump = signal(false);
-  throwBottle = signal(false);
 
   constructor() {
     window.addEventListener('keydown', (e) => this.onKeyDown(e));
@@ -19,14 +20,20 @@ export class InputService {
     if (e.key === 'ArrowLeft') this.moveLeft.set(true);
     if (e.key === 'ArrowRight') this.moveRight.set(true);
     if (e.key === 'ArrowUp') this.jump.set(true);
-    if (e.key === 'd') this.throwBottle.set(true);
+    if (e.key === ' ' && !this.throwPressed) {
+      this.throwPressed = true;
+      this.throwBottle.set(true);
+    }
   }
 
   private onKeyUp(e: KeyboardEvent) {
     if (e.key === 'ArrowLeft') this.moveLeft.set(false);
     if (e.key === 'ArrowRight') this.moveRight.set(false);
     if (e.key === 'ArrowUp') this.jump.set(false);
-    if (e.key === 'd') this.throwBottle.set(false);
+    if (e.key === ' ') {
+      this.throwPressed = false;
+      this.throwBottle.set(false);
+    }
   }
 
   setMoveLeft(value: boolean) {

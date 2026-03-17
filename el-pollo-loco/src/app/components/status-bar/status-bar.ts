@@ -16,11 +16,13 @@ export class StatusBarComponent {
   }
 
   getCoinImage(): string {
-    return this.getStatusImage(this.gameService.coins() * 10);
+    const value = (this.gameService.coins() / 5) * 100;
+    return this.getStatusImage(value);
   }
 
   getBottleImage(): string {
-    return this.getStatusImage(this.gameService.bottles() * 10);
+    const value = (this.gameService.bottles() / 5) * 100;
+    return this.getStatusImage(value);
   }
 
   private getStatusImage(value: number): string {
