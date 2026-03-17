@@ -117,13 +117,23 @@ export class GameCanvasComponent implements OnInit, OnDestroy {
     this.level.bottles.forEach(b => b.loadImages(b.images_ground));
   }
 
+  private lastFrameTime = 0;
+  private fps = 60;
+
   private startGameLoop() {
-    const loop = () => {
-      this.update();
-      this.draw();
+    const loop = (timestamp: number) => {
+      const interval = 1000 / this.fps;
+      const delta = timestamp - this.lastFrameTime;
+
+      if (delta >= interval) {
+        this.lastFrameTime = timestamp - (delta % interval);
+        this.update();
+        this.draw();
+      }
+
       this.animationId = requestAnimationFrame(loop);
     };
-    loop();
+    this.animationId = requestAnimationFrame(loop);
   }
 
   private update() {
