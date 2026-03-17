@@ -16,8 +16,9 @@ export class AudioService {
     }
   }
 
-  loadSound(key: string, path: string) {
+  loadSound(key: string, path: string, volume = 1) {
     const audio = new Audio(path);
+    audio.volume = volume;
     this.sounds[key] = audio;
   }
 
@@ -42,5 +43,11 @@ export class AudioService {
     Object.values(this.sounds).forEach(audio => {
       audio.muted = this.isMuted();
     });
+  }
+
+  isPlaying(key: string): boolean {
+    const audio = this.sounds[key];
+    if (!audio) return false;
+    return !audio.paused;
   }
 }

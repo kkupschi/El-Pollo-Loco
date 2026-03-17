@@ -62,9 +62,25 @@ export class GameCanvasComponent implements OnInit, OnDestroy {
     });
     this.gameService.startGame();
     this.startAnimations();
-    this.audioService.loadSound('music', 'assets/sounds/music/music.mp3');
+    this.audioService.loadSound('music', 'assets/sounds/music/game_music.mp3', 0.1);
     this.audioService.playSound('music', true);
+    this.audioService.stopSound('menu_music');
     this.startGameLoop();
+    this.audioService.loadSound('music', 'assets/sounds/music/game_music.mp3', 0.1);
+    this.audioService.loadSound('characterDamage', 'assets/sounds/character/characterDamage.mp3', 0.1);
+    this.audioService.loadSound('characterDead', 'assets/sounds/character/characterDead.wav', 0.1);
+    this.audioService.loadSound('characterJump', 'assets/sounds/character/characterJump.wav', 0.1);
+    this.audioService.loadSound('characterRun', 'assets/sounds/character/characterRun.mp3', 0.1);
+    this.audioService.loadSound('characterSnoring', 'assets/sounds/character/characterSnoring.mp3', 0.1);
+    this.audioService.loadSound('chickenDead', 'assets/sounds/chicken/chickenDead.mp3', 0.1);
+    this.audioService.loadSound('chickenDead2', 'assets/sounds/chicken/chickenDead2.mp3', 0.1);
+    this.audioService.loadSound('bottleCollect', 'assets/sounds/collectibles/bottleCollectSound.wav', 0.1);
+    this.audioService.loadSound('coinCollect', 'assets/sounds/collectibles/collectSound.wav', 0.1);
+    this.audioService.loadSound('endbossApproach', 'assets/sounds/endboss/endbossApproach.wav', 0.1);
+    this.audioService.loadSound('gameStart', 'assets/sounds/game/gameStart.mp3', 0.1);
+    this.audioService.loadSound('bottleBreak', 'assets/sounds/throwable/bottleBreak.mp3', 0.1);
+    this.audioService.loadSound('lose', 'assets/sounds/win_lose/lose.mp3', 0.1);
+    this.audioService.loadSound('win', 'assets/sounds/win_lose/win.mp3', 0.1);
   }
 
   ngOnDestroy() {
@@ -160,7 +176,19 @@ export class GameCanvasComponent implements OnInit, OnDestroy {
   }
 
   private updateCharacter() {
-    if (this.inputService.moveRight()) {
+    if (this.inputService.moveRight() || this.inputService.moveLeft()) {
+      if (!this.audioService.isPlaying('characterRun')) {
+        this.audioService.playSound('characterRun', true);
+      }
+    } else {
+      this.audioService.stopSound('characterRun');
+    }
+
+    if (this.inputService.jump() && this.character.isGrounded) {
+      if (!this.audioService.isPlaying('characterJump')) {
+        this.audioService.playSound('characterJump');
+      }
+    } if (this.inputService.moveRight()) {
       this.character.moveRight();
       this.character.updateLastMoveTime();
     }
@@ -230,7 +258,13 @@ export class GameCanvasComponent implements OnInit, OnDestroy {
   private animationInterval: any;
 
   private startAnimations() {
-    this.animationInterval = setInterval(() => {
+    if (this.character.isSleeping) {
+      if (!this.audioService.isPlaying('characterSnoring')) {
+        this.audioService.playSound('characterSnoring', true);
+      }
+    } else {
+      this.audioService.stopSound('characterSnoring');
+    } this.animationInterval = setInterval(() => {
       this.character.imgIndex++;
       this.level.enemies.forEach(e => e.imgIndex++);
       this.level.endboss.forEach(b => b.imgIndex++);
@@ -239,6 +273,8 @@ export class GameCanvasComponent implements OnInit, OnDestroy {
   }
 
   private checkCharacterEnemyCollisions() {
+    this.audioService.playSound('chickenDead');
+    this.audioService.playSound('characterDamage');
     this.level.enemies.forEach(enemy => {
       if (enemy.isDead()) return;
       if (this.character.isColliding(enemy)) {
@@ -259,6 +295,7 @@ export class GameCanvasComponent implements OnInit, OnDestroy {
   }
 
   private checkCharacterEndbossCollision() {
+    this.audioService.playSound('characterDamage');
     this.level.endboss.forEach(boss => {
       if (boss.isDead()) return;
       if (this.character.isColliding(boss)) {
@@ -275,8 +312,10 @@ export class GameCanvasComponent implements OnInit, OnDestroy {
   }
 
   private checkCharacterCoinCollisions() {
+    this.audioService.playSound('coinCollect');
     this.level.coins = this.level.coins.filter(coin => {
       if (this.character.isColliding(coin)) {
+        this.audioService.playSound('coinCollect');
         this.gameService.coins.set(this.gameService.coins() + 1);
         return false;
       }
@@ -294,7 +333,9 @@ export class GameCanvasComponent implements OnInit, OnDestroy {
     });
   }
 
+
   private checkBottleEnemyCollisions() {
+    this.audioService.playSound('bottleBreak');
     this.thrownBottles.forEach(bottle => {
       this.level.enemies.forEach(enemy => {
         if (!enemy.isDead() && bottle.isColliding(enemy)) {
@@ -312,6 +353,7 @@ export class GameCanvasComponent implements OnInit, OnDestroy {
   }
 
   private checkEndbossProximity() {
+    this.audioService.playSound('endbossApproach');
     this.level.endboss.forEach(boss => {
       if (Math.abs(this.character.x - boss.x) < 300 && !boss.isAlerted) {
         boss.alert();

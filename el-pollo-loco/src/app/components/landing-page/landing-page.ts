@@ -15,7 +15,10 @@ export class LandingPageComponent {
   menuVisible = signal(true);
   controlsOpen = signal(false);
 
-  constructor(public audioService: AudioService) { }
+  constructor(public audioService: AudioService) {
+    this.audioService.loadSound('menu_music', 'assets/sounds/music/menu_music.mp3', 0.1);
+    this.audioService.playSound('menu_music', true);
+  }
 
   startGame() {
     this.menuVisible.set(false);
