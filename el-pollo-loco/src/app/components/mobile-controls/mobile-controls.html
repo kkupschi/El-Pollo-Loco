@@ -1,1 +1,22 @@
-<p>mobile-controls works!</p>
+<div class="mobile-controls">
+    <div class="controls-left">
+        <button class="ctrl-btn" (touchstart)="onLeftStart()" (touchend)="onLeftEnd()"
+            (contextmenu)="$event.preventDefault()">
+            <img src="/assets/icons/arrow_left.png" alt="Links" />
+        </button>
+        <button class="ctrl-btn" (touchstart)="onRightStart()" (touchend)="onRightEnd()"
+            (contextmenu)="$event.preventDefault()">
+            <img src="/assets/icons/arrow_right.png" alt="Rechts" />
+        </button>
+    </div>
+    <div class="controls-right">
+        <button class="ctrl-btn" (touchstart)="onJumpStart()" (touchend)="onJumpEnd()"
+            (contextmenu)="$event.preventDefault()">
+            <img src="/assets/icons/arrow_up.png" alt="Springen" />
+        </button>
+        <button class="ctrl-btn" (touchstart)="onThrow()" (touchend)="$event.preventDefault()"
+            (contextmenu)="$event.preventDefault()">
+            <img src="/assets/icons/bottle_button.png" alt="Flasche" />
+        </button>
+    </div>
+</div>
