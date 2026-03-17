@@ -1,3 +1,10 @@
+@font-face {
+    font-family: 'Zabar';
+    src: url('/assets/fonts/zabar/Zabars.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
 *,
 *::before,
 *::after {
@@ -16,5 +23,9 @@ body {
 }
 
 button {
+    cursor: pointer;
+}
+
+img[role="button"] {
     cursor: pointer;
 }
