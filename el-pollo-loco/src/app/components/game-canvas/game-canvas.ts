@@ -61,6 +61,7 @@ export class GameCanvasComponent implements OnInit, OnDestroy {
       });
     });
     this.gameService.startGame();
+    this.startAnimations();
     this.audioService.loadSound('music', 'assets/sounds/music/music.mp3');
     this.audioService.playSound('music', true);
     this.startGameLoop();
@@ -68,6 +69,7 @@ export class GameCanvasComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     cancelAnimationFrame(this.animationId);
+    clearInterval(this.animationInterval);
     this.audioService.stopSound('music');
   }
 
@@ -224,6 +226,17 @@ export class GameCanvasComponent implements OnInit, OnDestroy {
 
   private collidingEnemies = new Set<Enemy | SmallEnemy>();
   private collidingBoss = false;
+
+  private animationInterval: any;
+
+  private startAnimations() {
+    this.animationInterval = setInterval(() => {
+      this.character.imgIndex++;
+      this.level.enemies.forEach(e => e.imgIndex++);
+      this.level.endboss.forEach(b => b.imgIndex++);
+      this.thrownBottles.forEach(b => b.imgIndex++);
+    }, 100);
+  }
 
   private checkCharacterEnemyCollisions() {
     this.level.enemies.forEach(enemy => {
