@@ -38,8 +38,8 @@
 
 .canvas-wrapper {
     position: relative;
-    width: 720px;
-    height: 480px;
+    width: min(720px, 95vw);
+    height: min(480px, 63vw);
     z-index: 1;
 }
 
