@@ -32,7 +32,7 @@ export class LandingPageComponent implements OnInit {
   }
 
   onFirstInteraction() {
-    if (!this.audioService.isPlaying('menu_music')) {
+    if (!this.audioService.isPlaying('menu_music') && !this.audioService.isMuted()) {
       this.audioService.playSound('menu_music', true);
     }
   }
