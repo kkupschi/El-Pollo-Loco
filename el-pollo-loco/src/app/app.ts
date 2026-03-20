@@ -5,7 +5,12 @@ import { RouterOutlet } from '@angular/router';
   selector: 'app-root',
   standalone: true,
   imports: [RouterOutlet],
-  template: `<router-outlet />`,
+  template: `
+    <router-outlet />
+    <div class="rotate-message">
+      <p>🔄 Please rotate your device</p>
+    </div>
+  `,
   styles: [`
     :host {
       display: block;
