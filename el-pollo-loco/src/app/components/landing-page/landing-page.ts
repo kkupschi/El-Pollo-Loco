@@ -24,12 +24,17 @@ export class LandingPageComponent implements OnInit {
     this.gameService.gameState.set('menu');
     this.audioService.stopAllSounds();
     this.audioService.loadSound('menu_music', 'assets/sounds/music/menu_music.mp3', 0.1);
-    this.audioService.playSound('menu_music', true);
   }
 
   startGame() {
     this.audioService.stopSound('menu_music');
     this.gameService.startGame();
+  }
+
+  onFirstInteraction() {
+    if (!this.audioService.isPlaying('menu_music')) {
+      this.audioService.playSound('menu_music', true);
+    }
   }
 
   openControls() {

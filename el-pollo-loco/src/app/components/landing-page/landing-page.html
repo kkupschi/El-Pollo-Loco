@@ -1,6 +1,5 @@
-<div class="page-wrapper">
+<div class="page-wrapper" (click)="onFirstInteraction()">
     <div class="background"></div>
-
     @if (gameService.gameState() === 'menu') {
     <h1 class="game-title">El Pollo Loco</h1>
     <div class="canvas-wrapper">
@@ -19,11 +18,9 @@
         <img class="intro-image" src="assets/img/9_intro_outro_screens/startscreen_1.png" alt="El Pollo Loco" />
     </div>
     }
-
     @if (gameService.gameState() !== 'menu') {
     <app-game-canvas />
     }
-
     @if (controlsOpen()) {
     <div class="dialog-backdrop" (click)="closeControls()">
         <div class="dialog" (click)="$event.stopPropagation()">
