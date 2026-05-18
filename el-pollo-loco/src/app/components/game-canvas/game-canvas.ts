@@ -174,6 +174,9 @@ export class GameCanvasComponent implements OnInit, OnDestroy {
   private startAnimations() {
     this.animationInterval = setInterval(() => {
       this.character.imgIndex++;
+      if (!this.character.isGrounded && this.character.jumpAnimIndex < this.character.images_jumping.length - 1) {
+        this.character.jumpAnimIndex++;
+      }
       this.level.enemies.forEach(e => e.imgIndex++);
       this.level.endboss.forEach(b => b.imgIndex++);
       if (this.character.isSleeping) {
@@ -198,10 +201,12 @@ export class GameCanvasComponent implements OnInit, OnDestroy {
   private updateCharacter() {
     if (this.inputService.moveRight()) {
       this.character.moveRight();
+      this.character.facingLeft = false;
       this.character.updateLastMoveTime();
     }
     if (this.inputService.moveLeft() && this.character.x > 0) {
       this.character.moveLeft();
+      this.character.facingLeft = true;
       this.character.updateLastMoveTime();
     }
     if (this.inputService.moveRight() || this.inputService.moveLeft()) {
@@ -340,6 +345,7 @@ export class GameCanvasComponent implements OnInit, OnDestroy {
         if (!enemy.isDead() && !this.hitBottles.has(bottle) && bottle.isColliding(enemy)) {
           this.hitBottles.add(bottle);
           enemy.hit(1);
+          this.audioService.playSound('bottleBreak');
           this.audioService.playSound('chickenDead');
         }
       });
@@ -347,6 +353,7 @@ export class GameCanvasComponent implements OnInit, OnDestroy {
         if (!boss.isDead() && !this.hitBottles.has(bottle) && bottle.isColliding(boss)) {
           this.hitBottles.add(bottle);
           boss.hit(40);
+          this.audioService.playSound('bottleBreak');
           this.gameService.endbossHealth.set(boss.energy);
           if (boss.isDead()) {
             this.audioService.stopAllSounds();
@@ -453,14 +460,23 @@ export class GameCanvasComponent implements OnInit, OnDestroy {
     if (char.isDead()) {
       imgPath = char.images_dead[char.imgIndex % char.images_dead.length];
     } else if (!char.isGrounded) {
-      imgPath = char.images_jumping[char.imgIndex % char.images_jumping.length];
+      imgPath = char.images_jumping[char.jumpAnimIndex];
     } else if (this.inputService.moveLeft() || this.inputService.moveRight()) {
       imgPath = char.images_walking[char.imgIndex % char.images_walking.length];
     } else if (char.isSleeping) {
       imgPath = char.images_sleep[char.imgIndex % char.images_sleep.length];
     }
     const img = char.imageCache[imgPath];
-    if (img) this.ctx.drawImage(img, char.x, char.y, char.width, char.height);
+    if (!img) return;
+    if (char.facingLeft) {
+      this.ctx.save();
+      this.ctx.translate(char.x + char.width, char.y);
+      this.ctx.scale(-1, 1);
+      this.ctx.drawImage(img, 0, 0, char.width, char.height);
+      this.ctx.restore();
+    } else {
+      this.ctx.drawImage(img, char.x, char.y, char.width, char.height);
+    }
   }
 
   restartGame() {

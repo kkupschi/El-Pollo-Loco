@@ -17,9 +17,9 @@ export class InputService {
   }
 
   private onKeyDown(e: KeyboardEvent) {
-    if (e.key === 'ArrowLeft') this.moveLeft.set(true);
-    if (e.key === 'ArrowRight') this.moveRight.set(true);
-    if (e.key === 'ArrowUp') this.jump.set(true);
+    if (e.key === 'ArrowLeft' || e.code === 'KeyA') this.moveLeft.set(true);
+    if (e.key === 'ArrowRight' || e.code === 'KeyD') this.moveRight.set(true);
+    if (e.key === 'ArrowUp' || e.code === 'KeyW') this.jump.set(true);
     if (e.key === ' ' && !this.throwPressed) {
       this.throwPressed = true;
       this.throwBottle.set(true);
@@ -27,9 +27,9 @@ export class InputService {
   }
 
   private onKeyUp(e: KeyboardEvent) {
-    if (e.key === 'ArrowLeft') this.moveLeft.set(false);
-    if (e.key === 'ArrowRight') this.moveRight.set(false);
-    if (e.key === 'ArrowUp') this.jump.set(false);
+    if (e.key === 'ArrowLeft' || e.code === 'KeyA') this.moveLeft.set(false);
+    if (e.key === 'ArrowRight' || e.code === 'KeyD') this.moveRight.set(false);
+    if (e.key === 'ArrowUp' || e.code === 'KeyW') this.jump.set(false);
     if (e.key === ' ') {
       this.throwPressed = false;
       this.throwBottle.set(false);

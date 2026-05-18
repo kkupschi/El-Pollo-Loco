@@ -18,6 +18,8 @@ export class Character extends MovableObject {
     isGrounded = true;
     lastMoveTime = Date.now();
     isSleeping = false;
+    facingLeft = false;
+    jumpAnimIndex = 0;
 
     readonly jumpForce = -15;
     readonly gravity = 0.5;
@@ -89,6 +91,7 @@ export class Character extends MovableObject {
         if (!this.isGrounded) return;
         this.speedY = this.jumpForce;
         this.isGrounded = false;
+        this.jumpAnimIndex = 0;
     }
 
     applyGravity() {
