@@ -35,6 +35,7 @@ export class GameCanvasComponent implements OnInit, OnDestroy {
   private bottleImageCache: { [key: string]: HTMLImageElement } = {};
   private collidingEnemies = new Set<Enemy | SmallEnemy>();
   private collidingBoss = false;
+  private hitBottles = new Set<Bottle>();
 
   character = new Character();
   level!: Level;
@@ -102,50 +103,63 @@ export class GameCanvasComponent implements OnInit, OnDestroy {
     });
   }
 
+  private createEnemies() {
+    return [
+      new Enemy(600), new Enemy(900), new Enemy(1200),
+      new SmallEnemy(750), new SmallEnemy(1050), new SmallEnemy(1400),
+    ];
+  }
+
+  private createCoins() {
+    return [
+      new Coin(400, 200), new Coin(600, 150), new Coin(900, 250),
+      new Coin(1100, 180), new Coin(1500, 200),
+    ];
+  }
+
+  private createBottles() {
+    return [
+      new Bottle(300, 350), new Bottle(500, 350),
+      new Bottle(800, 350), new Bottle(1300, 350),
+    ];
+  }
+
+  private createBackgroundLayers() {
+    return [
+      ['assets/img/5_background/layers/air.png'],
+      ['assets/img/5_background/layers/3_third_layer/1.png', 'assets/img/5_background/layers/3_third_layer/2.png'],
+      ['assets/img/5_background/layers/2_second_layer/1.png', 'assets/img/5_background/layers/2_second_layer/2.png'],
+      ['assets/img/5_background/layers/1_first_layer/1.png', 'assets/img/5_background/layers/1_first_layer/2.png'],
+    ];
+  }
+
   private initLevel() {
     this.level = new Level(
-      [
-        new Enemy(600),
-        new Enemy(900),
-        new Enemy(1200),
-        new SmallEnemy(750),
-        new SmallEnemy(1050),
-        new SmallEnemy(1400),
-      ],
+      this.createEnemies(),
       [new Endboss()],
-      [
-        new Coin(400, 200),
-        new Coin(600, 150),
-        new Coin(900, 250),
-        new Coin(1100, 180),
-        new Coin(1500, 200),
-      ],
-      [
-        new Bottle(300, 350),
-        new Bottle(500, 350),
-        new Bottle(800, 350),
-        new Bottle(1300, 350),
-      ],
-      [
-        ['assets/img/5_background/layers/air.png'],
-        ['assets/img/5_background/layers/3_third_layer/1.png', 'assets/img/5_background/layers/3_third_layer/2.png'],
-        ['assets/img/5_background/layers/2_second_layer/1.png', 'assets/img/5_background/layers/2_second_layer/2.png'],
-        ['assets/img/5_background/layers/1_first_layer/1.png', 'assets/img/5_background/layers/1_first_layer/2.png'],
-      ]
+      this.createCoins(),
+      this.createBottles(),
+      this.createBackgroundLayers()
     );
   }
 
-  private loadAllImages() {
+  private loadCharacterImages() {
     this.character.loadImages(this.character.images_walking);
     this.character.loadImages(this.character.images_jumping);
     this.character.loadImages(this.character.images_hurt);
     this.character.loadImages(this.character.images_dead);
     this.character.loadImages(this.character.images_idle);
     this.character.loadImages(this.character.images_sleep);
+  }
+
+  private loadEnemyImages() {
     this.level.enemies.forEach(e => {
       e.loadImages(e.images_walking);
       e.loadImages(e.images_dead);
     });
+  }
+
+  private loadEndbossImages() {
     this.level.endboss.forEach(b => {
       b.loadImages(b.images_walking);
       b.loadImages(b.images_alert);
@@ -153,6 +167,12 @@ export class GameCanvasComponent implements OnInit, OnDestroy {
       b.loadImages(b.images_hurt);
       b.loadImages(b.images_dead);
     });
+  }
+
+  private loadAllImages() {
+    this.loadCharacterImages();
+    this.loadEnemyImages();
+    this.loadEndbossImages();
     this.level.coins.forEach(c => c.loadImages(c.images_coin));
     this.level.bottles.forEach(b => b.loadImages(b.images_ground));
   }
@@ -171,6 +191,16 @@ export class GameCanvasComponent implements OnInit, OnDestroy {
     this.animationId = requestAnimationFrame(loop);
   }
 
+  private updateSnoringSound() {
+    if (this.character.isSleeping) {
+      if (!this.audioService.isPlaying('characterSnoring')) {
+        this.audioService.playSound('characterSnoring', true);
+      }
+    } else {
+      this.audioService.stopSound('characterSnoring');
+    }
+  }
+
   private startAnimations() {
     this.animationInterval = setInterval(() => {
       this.character.imgIndex++;
@@ -179,13 +209,7 @@ export class GameCanvasComponent implements OnInit, OnDestroy {
       }
       this.level.enemies.forEach(e => e.imgIndex++);
       this.level.endboss.forEach(b => b.imgIndex++);
-      if (this.character.isSleeping) {
-        if (!this.audioService.isPlaying('characterSnoring')) {
-          this.audioService.playSound('characterSnoring', true);
-        }
-      } else {
-        this.audioService.stopSound('characterSnoring');
-      }
+      this.updateSnoringSound();
     }, 100);
   }
 
@@ -198,17 +222,20 @@ export class GameCanvasComponent implements OnInit, OnDestroy {
     this.updateCamera();
   }
 
-  private updateCharacter() {
-    if (this.inputService.moveRight()) {
-      this.character.moveRight();
-      this.character.facingLeft = false;
-      this.character.updateLastMoveTime();
-    }
-    if (this.inputService.moveLeft() && this.character.x > 0) {
-      this.character.moveLeft();
-      this.character.facingLeft = true;
-      this.character.updateLastMoveTime();
-    }
+  private handleMoveRight() {
+    this.character.moveRight();
+    this.character.facingLeft = false;
+    this.character.updateLastMoveTime();
+  }
+
+  private handleMoveLeft() {
+    if (this.character.x <= 0) return;
+    this.character.moveLeft();
+    this.character.facingLeft = true;
+    this.character.updateLastMoveTime();
+  }
+
+  private handleRunSound() {
     if (this.inputService.moveRight() || this.inputService.moveLeft()) {
       if (!this.audioService.isPlaying('characterRun')) {
         this.audioService.playSound('characterRun', true);
@@ -216,6 +243,12 @@ export class GameCanvasComponent implements OnInit, OnDestroy {
     } else {
       this.audioService.stopSound('characterRun');
     }
+  }
+
+  private updateCharacter() {
+    if (this.inputService.moveRight()) this.handleMoveRight();
+    if (this.inputService.moveLeft()) this.handleMoveLeft();
+    this.handleRunSound();
     if (this.inputService.jump() && this.character.isGrounded) {
       this.character.jump();
       this.character.updateLastMoveTime();
@@ -268,47 +301,51 @@ export class GameCanvasComponent implements OnInit, OnDestroy {
     this.checkEndbossProximity();
   }
 
+  private handleCharacterDeath() {
+    this.audioService.stopAllSounds();
+    this.audioService.playSound('lose');
+    this.gameService.loseGame();
+  }
+
+  private handleEnemyCollision(enemy: Enemy | SmallEnemy) {
+    if (this.collidingEnemies.has(enemy)) return;
+    this.collidingEnemies.add(enemy);
+    if (this.character.isAbove(enemy)) {
+      enemy.hit(1);
+      this.audioService.playSound('chickenDead');
+    } else {
+      this.character.hit(20);
+      this.audioService.playSound('characterDamage');
+      this.gameService.characterHealth.set(this.character.energy);
+      if (this.character.isDead()) this.handleCharacterDeath();
+    }
+  }
+
   private checkCharacterEnemyCollisions() {
     this.level.enemies.forEach(enemy => {
       if (enemy.isDead()) return;
       if (this.character.isColliding(enemy)) {
-        if (!this.collidingEnemies.has(enemy)) {
-          this.collidingEnemies.add(enemy);
-          if (this.character.isAbove(enemy)) {
-            enemy.hit(1);
-            this.audioService.playSound('chickenDead');
-          } else {
-            this.character.hit(20);
-            this.audioService.playSound('characterDamage');
-            this.gameService.characterHealth.set(this.character.energy);
-            if (this.character.isDead()) {
-              this.audioService.stopAllSounds();
-              this.audioService.playSound('lose');
-              this.gameService.loseGame();
-            }
-          }
-        }
+        this.handleEnemyCollision(enemy);
       } else {
         this.collidingEnemies.delete(enemy);
       }
     });
   }
 
+  private handleEndbossCollision() {
+    if (this.collidingBoss) return;
+    this.collidingBoss = true;
+    this.character.hit(40);
+    this.audioService.playSound('characterDamage');
+    this.gameService.characterHealth.set(this.character.energy);
+    if (this.character.isDead()) this.handleCharacterDeath();
+  }
+
   private checkCharacterEndbossCollision() {
     this.level.endboss.forEach(boss => {
       if (boss.isDead()) return;
       if (this.character.isColliding(boss)) {
-        if (!this.collidingBoss) {
-          this.collidingBoss = true;
-          this.character.hit(40);
-          this.audioService.playSound('characterDamage');
-          this.gameService.characterHealth.set(this.character.energy);
-          if (this.character.isDead()) {
-            this.audioService.stopAllSounds();
-            this.audioService.playSound('lose');
-            this.gameService.loseGame();
-          }
-        }
+        this.handleEndbossCollision();
       } else {
         this.collidingBoss = false;
       }
@@ -337,31 +374,39 @@ export class GameCanvasComponent implements OnInit, OnDestroy {
     });
   }
 
-  private hitBottles = new Set<Bottle>();
+  private checkBottleHitsEnemy(bottle: Bottle) {
+    this.level.enemies.forEach(enemy => {
+      if (!enemy.isDead() && !this.hitBottles.has(bottle) && bottle.isColliding(enemy)) {
+        this.hitBottles.add(bottle);
+        enemy.hit(1);
+        this.audioService.playSound('bottleBreak');
+        this.audioService.playSound('chickenDead');
+      }
+    });
+  }
+
+  private handleEndbossDefeated() {
+    this.audioService.stopAllSounds();
+    this.audioService.playSound('win');
+    this.gameService.winGame();
+  }
+
+  private checkBottleHitsBoss(bottle: Bottle) {
+    this.level.endboss.forEach(boss => {
+      if (!boss.isDead() && !this.hitBottles.has(bottle) && bottle.isColliding(boss)) {
+        this.hitBottles.add(bottle);
+        boss.hit(40);
+        this.audioService.playSound('bottleBreak');
+        this.gameService.endbossHealth.set(boss.energy);
+        if (boss.isDead()) this.handleEndbossDefeated();
+      }
+    });
+  }
 
   private checkBottleEnemyCollisions() {
     this.thrownBottles.forEach(bottle => {
-      this.level.enemies.forEach(enemy => {
-        if (!enemy.isDead() && !this.hitBottles.has(bottle) && bottle.isColliding(enemy)) {
-          this.hitBottles.add(bottle);
-          enemy.hit(1);
-          this.audioService.playSound('bottleBreak');
-          this.audioService.playSound('chickenDead');
-        }
-      });
-      this.level.endboss.forEach(boss => {
-        if (!boss.isDead() && !this.hitBottles.has(bottle) && bottle.isColliding(boss)) {
-          this.hitBottles.add(bottle);
-          boss.hit(40);
-          this.audioService.playSound('bottleBreak');
-          this.gameService.endbossHealth.set(boss.energy);
-          if (boss.isDead()) {
-            this.audioService.stopAllSounds();
-            this.audioService.playSound('win');
-            this.gameService.winGame();
-          }
-        }
-      });
+      this.checkBottleHitsEnemy(bottle);
+      this.checkBottleHitsBoss(bottle);
     });
   }
 
@@ -454,26 +499,31 @@ export class GameCanvasComponent implements OnInit, OnDestroy {
     });
   }
 
+  private getCharacterImagePath(): string {
+    const char = this.character;
+    if (char.isDead()) return char.images_dead[char.imgIndex % char.images_dead.length];
+    if (!char.isGrounded) return char.images_jumping[char.jumpAnimIndex];
+    if (this.inputService.moveLeft() || this.inputService.moveRight()) {
+      return char.images_walking[char.imgIndex % char.images_walking.length];
+    }
+    if (char.isSleeping) return char.images_sleep[char.imgIndex % char.images_sleep.length];
+    return char.images_idle[char.imgIndex % char.images_idle.length];
+  }
+
+  private drawFlipped(img: HTMLImageElement, x: number, y: number, w: number, h: number) {
+    this.ctx.save();
+    this.ctx.translate(x + w, y);
+    this.ctx.scale(-1, 1);
+    this.ctx.drawImage(img, 0, 0, w, h);
+    this.ctx.restore();
+  }
+
   private drawCharacter() {
     const char = this.character;
-    let imgPath = char.images_idle[char.imgIndex % char.images_idle.length];
-    if (char.isDead()) {
-      imgPath = char.images_dead[char.imgIndex % char.images_dead.length];
-    } else if (!char.isGrounded) {
-      imgPath = char.images_jumping[char.jumpAnimIndex];
-    } else if (this.inputService.moveLeft() || this.inputService.moveRight()) {
-      imgPath = char.images_walking[char.imgIndex % char.images_walking.length];
-    } else if (char.isSleeping) {
-      imgPath = char.images_sleep[char.imgIndex % char.images_sleep.length];
-    }
-    const img = char.imageCache[imgPath];
+    const img = char.imageCache[this.getCharacterImagePath()];
     if (!img) return;
     if (char.facingLeft) {
-      this.ctx.save();
-      this.ctx.translate(char.x + char.width, char.y);
-      this.ctx.scale(-1, 1);
-      this.ctx.drawImage(img, 0, 0, char.width, char.height);
-      this.ctx.restore();
+      this.drawFlipped(img, char.x, char.y, char.width, char.height);
     } else {
       this.ctx.drawImage(img, char.x, char.y, char.width, char.height);
     }
