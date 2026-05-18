@@ -36,10 +36,16 @@
     margin-bottom: 1rem;
 }
 
+@media (max-height: 530px) {
+    .game-title {
+        display: none;
+    }
+}
+
 .canvas-wrapper {
     position: relative;
-    width: min(720px, 95vw);
-    height: min(480px, 63vw);
+    width: min(720px, 95vw, calc(100dvh * 1.5));
+    aspect-ratio: 720 / 480;
     z-index: 1;
 }
 
