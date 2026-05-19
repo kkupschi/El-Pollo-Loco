@@ -80,6 +80,7 @@ export class GameCanvasComponent implements OnInit, OnDestroy {
     this.audioService.loadSound('coinCollect', 'assets/sounds/collectibles/collectSound.wav', 0.4);
     this.audioService.loadSound('endbossApproach', 'assets/sounds/endboss/endbossApproach.wav', 0.4);
     this.audioService.loadSound('bottleBreak', 'assets/sounds/throwable/bottleBreak.mp3', 0.4);
+    this.audioService.loadSound('bossfight', 'assets/sounds/endboss/bossfight.mp3', 0.2);
     this.audioService.loadSound('lose', 'assets/sounds/win_lose/lose.mp3', 0.4);
     this.audioService.loadSound('win', 'assets/sounds/win_lose/win.mp3', 0.4);
   }
@@ -271,8 +272,10 @@ export class GameCanvasComponent implements OnInit, OnDestroy {
 
   private throwBottle() {
     if (this.gameService.bottles() <= 0) return;
-    const bottle = new Bottle(this.character.x + 50, this.character.y + 100);
+    const startX = this.character.facingLeft ? this.character.x - 50 : this.character.x + 50;
+    const bottle = new Bottle(startX, this.character.y + 100);
     bottle.imageCache = this.bottleImageCache;
+    bottle.facingLeft = this.character.facingLeft;
     bottle.throw();
     this.thrownBottles.push(bottle);
     this.gameService.bottles.set(this.gameService.bottles() - 1);
@@ -283,14 +286,16 @@ export class GameCanvasComponent implements OnInit, OnDestroy {
       if (!enemy.isDead()) enemy.moveLeft();
     });
     this.level.endboss.forEach(boss => {
-      if (!boss.isDead()) boss.moveLeft();
+      if (!boss.isDead() && boss.isAlerted) {
+        boss.followCharacter(this.character.x);
+      }
     });
   }
 
   private updateBottles() {
     this.thrownBottles.forEach(bottle => {
       if (bottle.isThrown) {
-        bottle.x += bottle.speed;
+        bottle.x += bottle.facingLeft ? -bottle.speed : bottle.speed;
         bottle.speedY += 0.5;
         bottle.y += bottle.speedY;
         bottle.imgIndex = (bottle.imgIndex + 1) % bottle.images_rotation.length;
@@ -422,7 +427,9 @@ export class GameCanvasComponent implements OnInit, OnDestroy {
       if (Math.abs(this.character.x - boss.x) < 300 && !boss.isAlerted) {
         boss.alert();
         this.gameService.endbossVisible.set(true);
+        this.audioService.stopSound('music');
         this.audioService.playSound('endbossApproach');
+        this.audioService.playSound('bossfight', true);
       }
     });
   }

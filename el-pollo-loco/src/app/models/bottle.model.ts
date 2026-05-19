@@ -14,6 +14,7 @@ export class Bottle extends MovableObject {
 
     isThrown = false;
     speedY = 0;
+    facingLeft = false;
 
     images_rotation = [
         'assets/img/6_salsa_bottle/bottle_rotation/1_bottle_rotation.png',

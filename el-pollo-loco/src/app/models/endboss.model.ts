@@ -2,15 +2,15 @@ import { MovableObject } from './movable-object.model';
 
 export class Endboss extends MovableObject {
 
-    override width = 250;
-    override height = 250;
-    override speed = 0.8;
+    override width = 350;
+    override height = 350;
+    override speed = 1.5;
     override energy = 100;
 
-    override offsetTop = 80;
-    override offsetBottom = 20;
-    override offsetLeft = 40;
-    override offsetRight = 40;
+    override offsetTop = 110;
+    override offsetBottom = 30;
+    override offsetLeft = 55;
+    override offsetRight = 55;
 
     isAlerted = false;
     isAttacking = false;
@@ -59,7 +59,7 @@ export class Endboss extends MovableObject {
     constructor() {
         super();
         this.x = 2500;
-        this.y = 180;
+        this.y = 80;
     }
 
     alert() {
@@ -68,5 +68,13 @@ export class Endboss extends MovableObject {
 
     attack() {
         this.isAttacking = true;
+    }
+
+    followCharacter(characterX: number) {
+        if (characterX < this.x) {
+            this.x -= this.speed;
+        } else {
+            this.x += this.speed;
+        }
     }
 }
