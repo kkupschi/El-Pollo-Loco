@@ -20,6 +20,8 @@ export class Character extends MovableObject {
     isSleeping = false;
     facingLeft = false;
     jumpAnimIndex = 0;
+    isHurt = false;
+    hurtAnimIndex = 0;
 
     readonly jumpForce = -15;
     readonly gravity = 0.5;
@@ -123,5 +125,7 @@ export class Character extends MovableObject {
     override hit(damage: number) {
         this.energy -= damage;
         if (this.energy < 0) this.energy = 0;
+        this.isHurt = true;
+        this.hurtAnimIndex = 0;
     }
 }

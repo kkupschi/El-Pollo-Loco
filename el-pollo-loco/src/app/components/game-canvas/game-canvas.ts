@@ -207,6 +207,13 @@ export class GameCanvasComponent implements OnInit, OnDestroy {
       if (!this.character.isGrounded && this.character.jumpAnimIndex < this.character.images_jumping.length - 1) {
         this.character.jumpAnimIndex++;
       }
+      if (this.character.isHurt) {
+        if (this.character.hurtAnimIndex < this.character.images_hurt.length - 1) {
+          this.character.hurtAnimIndex++;
+        } else {
+          this.character.isHurt = false;
+        }
+      }
       this.level.enemies.forEach(e => e.imgIndex++);
       this.level.endboss.forEach(b => b.imgIndex++);
       this.updateSnoringSound();
@@ -502,6 +509,7 @@ export class GameCanvasComponent implements OnInit, OnDestroy {
   private getCharacterImagePath(): string {
     const char = this.character;
     if (char.isDead()) return char.images_dead[char.imgIndex % char.images_dead.length];
+    if (char.isHurt) return char.images_hurt[char.hurtAnimIndex];
     if (!char.isGrounded) return char.images_jumping[char.jumpAnimIndex];
     if (this.inputService.moveLeft() || this.inputService.moveRight()) {
       return char.images_walking[char.imgIndex % char.images_walking.length];
