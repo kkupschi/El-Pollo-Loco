@@ -38,6 +38,7 @@ export class GameService {
     this.bottles.set(0);
     this.characterHealth.set(100);
     this.endbossHealth.set(100);
+    this.endbossVisible.set(false);
     this.gameState.set('running');
   }
 }
