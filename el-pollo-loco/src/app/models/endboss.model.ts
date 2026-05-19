@@ -58,7 +58,7 @@ export class Endboss extends MovableObject {
 
     constructor() {
         super();
-        this.x = 2500;
+        this.x = 1800;
         this.y = 80;
     }
 
