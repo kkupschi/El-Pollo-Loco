@@ -69,19 +69,19 @@ export class GameCanvasComponent implements OnInit, OnDestroy {
   }
 
   private loadAllSounds() {
-    this.audioService.loadSound('music', 'assets/sounds/music/game_music.mp3', 0.3);
-    this.audioService.loadSound('characterDamage', 'assets/sounds/character/characterDamage.mp3', 0.7);
-    this.audioService.loadSound('characterDead', 'assets/sounds/character/characterDead.wav', 0.7);
-    this.audioService.loadSound('characterJump', 'assets/sounds/character/characterJump.wav', 0.7);
-    this.audioService.loadSound('characterRun', 'assets/sounds/character/characterRun.mp3', 0.3);
-    this.audioService.loadSound('characterSnoring', 'assets/sounds/character/characterSnoring.mp3', 0.3);
-    this.audioService.loadSound('chickenDead', 'assets/sounds/chicken/chickenDead.mp3', 0.7);
-    this.audioService.loadSound('bottleCollect', 'assets/sounds/collectibles/bottleCollectSound.wav', 0.7);
-    this.audioService.loadSound('coinCollect', 'assets/sounds/collectibles/collectSound.wav', 0.7);
-    this.audioService.loadSound('endbossApproach', 'assets/sounds/endboss/endbossApproach.wav', 0.7);
-    this.audioService.loadSound('bottleBreak', 'assets/sounds/throwable/bottleBreak.mp3', 0.7);
-    this.audioService.loadSound('lose', 'assets/sounds/win_lose/lose.mp3', 0.7);
-    this.audioService.loadSound('win', 'assets/sounds/win_lose/win.mp3', 0.7);
+    this.audioService.loadSound('music', 'assets/sounds/music/game_music.mp3', 0.15);
+    this.audioService.loadSound('characterDamage', 'assets/sounds/character/characterDamage.mp3', 0.4);
+    this.audioService.loadSound('characterDead', 'assets/sounds/character/characterDead.wav', 0.4);
+    this.audioService.loadSound('characterJump', 'assets/sounds/character/characterJump.wav', 0.3);
+    this.audioService.loadSound('characterRun', 'assets/sounds/character/characterRun.mp3', 0.15);
+    this.audioService.loadSound('characterSnoring', 'assets/sounds/character/characterSnoring.mp3', 0.2);
+    this.audioService.loadSound('chickenDead', 'assets/sounds/chicken/chickenDead.mp3', 0.4);
+    this.audioService.loadSound('bottleCollect', 'assets/sounds/collectibles/bottleCollectSound.wav', 0.4);
+    this.audioService.loadSound('coinCollect', 'assets/sounds/collectibles/collectSound.wav', 0.4);
+    this.audioService.loadSound('endbossApproach', 'assets/sounds/endboss/endbossApproach.wav', 0.4);
+    this.audioService.loadSound('bottleBreak', 'assets/sounds/throwable/bottleBreak.mp3', 0.4);
+    this.audioService.loadSound('lose', 'assets/sounds/win_lose/lose.mp3', 0.4);
+    this.audioService.loadSound('win', 'assets/sounds/win_lose/win.mp3', 0.4);
   }
 
   private preloadBottleImages() {

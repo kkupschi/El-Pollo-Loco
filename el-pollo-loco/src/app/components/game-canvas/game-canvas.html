@@ -1,6 +1,9 @@
 <div class="game-wrapper">
     <app-status-bar />
     <canvas #canvas width="720" height="480" class="game-canvas"></canvas>
+    <img class="mute-icon-ingame" role="button"
+        src="/assets/icons/{{ audioService.isMuted() ? 'sound_off' : 'sound_on' }}.png" alt="Sound"
+        (click)="audioService.toggleMute()" />
     <app-mobile-controls />
     @if (gameService.gameState() === 'won' || gameService.gameState() === 'lost') {
     <app-end-screen (onRestart)="restartGame()" (onHome)="goHome()" />
