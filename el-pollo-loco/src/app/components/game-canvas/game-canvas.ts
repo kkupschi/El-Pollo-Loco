@@ -120,8 +120,9 @@ export class GameCanvasComponent implements OnInit, OnDestroy {
 
   private createBottles() {
     return [
-      new Bottle(300, 350), new Bottle(500, 350),
-      new Bottle(800, 350), new Bottle(1300, 350),
+      new Bottle(200, 350), new Bottle(450, 350),
+      new Bottle(700, 350), new Bottle(1000, 350),
+      new Bottle(1400, 350),
     ];
   }
 
