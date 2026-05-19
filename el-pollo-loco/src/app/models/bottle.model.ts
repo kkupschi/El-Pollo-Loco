@@ -7,10 +7,10 @@ export class Bottle extends MovableObject {
     override speed = 10;
     override energy = 1;
 
-    override offsetTop = 10;
-    override offsetBottom = 10;
-    override offsetLeft = 10;
-    override offsetRight = 10;
+    override offsetTop = 20;
+    override offsetBottom = 20;
+    override offsetLeft = 20;
+    override offsetRight = 20;
 
     isThrown = false;
     speedY = 0;
