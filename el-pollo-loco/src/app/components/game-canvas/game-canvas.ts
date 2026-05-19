@@ -302,7 +302,7 @@ export class GameCanvasComponent implements OnInit, OnDestroy {
         bottle.imgIndex = (bottle.imgIndex + 1) % bottle.images_rotation.length;
       }
     });
-    this.thrownBottles = this.thrownBottles.filter(b => b.y < 480 && b.x < 3000);
+    this.thrownBottles = this.thrownBottles.filter(b => b.y < 480 && b.x < 3000 && b.x > -200);
   }
 
   private checkCollisions() {

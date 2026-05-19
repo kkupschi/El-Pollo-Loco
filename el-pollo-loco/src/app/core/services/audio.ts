@@ -26,7 +26,7 @@ export class AudioService {
     const audio = this.sounds[key];
     if (!audio || this.isMuted()) return;
     audio.loop = loop;
-    audio.play();
+    audio.play().catch(() => {});
   }
 
   stopSound(key: string) {
